@@ -1,0 +1,14 @@
+// (임시) middleware 비활성화: Prisma는 Edge에서 실행 불가라서 로그인 세션에서 오류가 남.
+// export { auth as middleware } from "@/lib/auth";
+
+// export const config = {
+//   matcher: [
+//     "/((?!api/auth|_next/static|_next/image|favicon.ico|logo.svg).*)",
+//   ],
+// };export { auth as middleware } from "@/lib/auth";
+
+export const config = {
+  matcher: [
+    "/((?!api/auth|_next/static|_next/image|favicon.ico|logo.svg).*)",
+  ],
+};

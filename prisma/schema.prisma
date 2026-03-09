@@ -1,0 +1,637 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+
+// ============================================
+// Authentication & User Management
+// ============================================
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  name           String
+  password       String
+  profileImage   String?
+  phone          String?
+  position       String?
+  rank           String?
+  employeeNumber String?  @unique
+  isActive       Boolean  @default(true)
+  isAdmin        Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+  roleId       String?
+  role         Role?       @relation(fields: [roleId], references: [id])
+
+  assignedTasks      Task[]            @relation("TaskAssignee")
+  createdTasks       Task[]            @relation("TaskCreator")
+  taskComments       TaskComment[]
+  projectMembers     ProjectMember[]
+  submittedApprovals ApprovalRequest[] @relation("ApprovalSubmitter")
+  approvalSteps      ApprovalStep[]
+  notifications      Notification[]
+  accounts           Account[]
+  sessions           Session[]
+  policyDocumentsUploaded  PolicyDocument[]     @relation("PolicyDocumentUploader")
+  policyDocumentsArchived  PolicyDocument[]     @relation("PolicyDocumentArchiver")
+  policyDocumentLogs       PolicyDocumentLog[]
+
+  // Document system
+  documentsCreated         Document[]            @relation("DocumentCreator")
+  documentsArchived        Document[]            @relation("DocumentArchiver")
+  documentLogs             DocumentLog[]
+
+  // Document approval system
+  docApprovalsSubmitted    DocumentApproval[]     @relation("DocApprovalSubmitter")
+  docApprovalSteps         DocumentApprovalStep[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============================================
+// Role & Permission
+// ============================================
+
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  displayName String
+  description String?
+  createdAt   DateTime @default(now())
+
+  users       User[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          String @id @default(cuid())
+  code        String @unique
+  description String?
+
+  roles RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+// ============================================
+// Organization Structure
+// ============================================
+
+model Department {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  description String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parentId String?
+  parent   Department?  @relation("DepartmentHierarchy", fields: [parentId], references: [id])
+  children Department[] @relation("DepartmentHierarchy")
+
+  members  User[]
+  projects Project[]
+}
+
+// ============================================
+// Project Management
+// ============================================
+
+model Project {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  status      String    @default("ACTIVE")
+  startDate   DateTime?
+  endDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id])
+
+  tasks   Task[]
+  members ProjectMember[]
+}
+
+model ProjectMember {
+  id       String   @id @default(cuid())
+  role     String   @default("MEMBER")
+  joinedAt DateTime @default(now())
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+}
+
+// ============================================
+// Task Management
+// ============================================
+
+model Task {
+  id             String    @id @default(cuid())
+  title          String
+  description    String?
+  status         String    @default("TODO")
+  priority       String    @default("MEDIUM")
+  sortOrder      Int       @default(0)
+  dueDate        DateTime?
+  startDate      DateTime?
+  completedAt    DateTime?
+  estimatedHours Float?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  projectId  String?
+  project    Project? @relation(fields: [projectId], references: [id])
+  assigneeId String?
+  assignee   User?    @relation("TaskAssignee", fields: [assigneeId], references: [id])
+  creatorId  String
+  creator    User     @relation("TaskCreator", fields: [creatorId], references: [id])
+  parentId   String?
+  parent     Task?    @relation("TaskSubtasks", fields: [parentId], references: [id])
+  subtasks   Task[]   @relation("TaskSubtasks")
+
+  comments    TaskComment[]
+  labels      TaskLabel[]
+  attachments Attachment[]  @relation("TaskAttachments")
+}
+
+model TaskComment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  taskId   String
+  task     Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+}
+
+model Label {
+  id    String @id @default(cuid())
+  name  String
+  color String @default("#6B7280")
+
+  tasks TaskLabel[]
+}
+
+model TaskLabel {
+  taskId  String
+  labelId String
+  task    Task  @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  label   Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, labelId])
+}
+
+// ============================================
+// Approval Workflow (기존 결재)
+// ============================================
+
+model ApprovalTemplate {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String
+  formSchema  String
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  requests ApprovalRequest[]
+}
+
+model ApprovalRequest {
+  id          String    @id @default(cuid())
+  title       String
+  content     String
+  status      String    @default("DRAFT")
+  urgency     String    @default("NORMAL")
+  submittedAt DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  templateId  String?
+  template    ApprovalTemplate? @relation(fields: [templateId], references: [id])
+  submitterId String
+  submitter   User              @relation("ApprovalSubmitter", fields: [submitterId], references: [id])
+
+  steps       ApprovalStep[]
+  attachments Attachment[]    @relation("ApprovalAttachments")
+}
+
+model ApprovalStep {
+  id        String    @id @default(cuid())
+  stepOrder Int
+  type      String    @default("APPROVE")
+  status    String    @default("PENDING")
+  comment   String?
+  actionAt  DateTime?
+  createdAt DateTime  @default(now())
+
+  requestId  String
+  request    ApprovalRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  approverId String
+  approver   User            @relation(fields: [approverId], references: [id])
+
+  @@unique([requestId, stepOrder])
+}
+
+// ============================================
+// Shared
+// ============================================
+
+model Attachment {
+  id        String   @id @default(cuid())
+  fileName  String
+  fileSize  Int
+  mimeType  String
+  filePath  String
+  createdAt DateTime @default(now())
+
+  taskId            String?
+  task              Task?            @relation("TaskAttachments", fields: [taskId], references: [id])
+  approvalRequestId String?
+  approvalRequest   ApprovalRequest? @relation("ApprovalAttachments", fields: [approvalRequestId], references: [id])
+}
+
+// ============================================
+// Safety - Policy Documents (기존 유지)
+// ============================================
+
+model PolicyDocument {
+  id            String    @id @default(cuid())
+  extension     String    // "pdf", "pptx", "ppt", "doc", "docx"
+  version       Int
+  originalName  String
+  storagePath   String
+  fileSize      Int
+  mimeType      String
+  policyType    String    @default("SIGNED_PDF") // "SIGNED_PDF" | "POLICY_PPT"
+  category      String    @default("POLICY")    // "POLICY" | "GOALS"
+  isCurrent     Boolean   @default(false)
+  isArchived    Boolean   @default(false)
+  siteCode      String    @default("ALL")  // "ALL", "HS", "PT" etc.
+  year          Int       @default(2026)
+  archivedAt    DateTime?
+  archivedById  String?
+  archivedBy    User?     @relation("PolicyDocumentArchiver", fields: [archivedById], references: [id])
+  uploadedById  String
+  uploadedBy    User      @relation("PolicyDocumentUploader", fields: [uploadedById], references: [id])
+  createdAt     DateTime  @default(now())
+
+  logs          PolicyDocumentLog[]
+}
+
+model PolicyDocumentLog {
+  id            String          @id @default(cuid())
+  documentId    String?
+  document      PolicyDocument? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  action        String          // "ARCHIVE" | "RESTORE" | "DELETE"
+  performedById String
+  performedBy   User            @relation(fields: [performedById], references: [id])
+  detail        String?
+  createdAt     DateTime        @default(now())
+}
+
+// ============================================
+// Navigation Menu Tree
+// ============================================
+
+model MenuNode {
+  id        String     @id @default(cuid())
+  parentId  String?
+  parent    MenuNode?  @relation("MenuTree", fields: [parentId], references: [id])
+  children  MenuNode[] @relation("MenuTree")
+  title     String
+  slug      String     @unique
+  domain    String     // COMMON, PRODUCTION, ENV, SAFETY
+  type      String     // FOLDER, PAGE
+  route     String?
+  icon      String?    // lucide icon name (top-level only)
+  color     String?    // card color name (blue, emerald, orange, etc.)
+  sortOrder Int        @default(0)
+  isActive  Boolean    @default(true)
+  moduleKey String?    // 연결 모듈 키 (예: air_management, safety_policy)
+  scopeType String     @default("SITE_ONLY") // GLOBAL_ONLY | SITE_ONLY | BOTH
+  pageType  String     @default("NONE") // NONE | DOCUMENT_ARCHIVE | DOCUMENT_APPROVAL
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  formTemplates FormTemplate[]
+}
+
+// ============================================
+// Site (사업장) Management
+// ============================================
+
+model Site {
+  id        String   @id @default(cuid())
+  code      String   @unique  // "HS", "PT", "PK" etc.
+  name      String            // "화성", "평택", "판교"
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+// ============================================
+// Form Template (양식 관리)
+// ============================================
+
+model FormTemplate {
+  id               String   @id @default(cuid())
+  name             String
+  description      String?
+  formType         String   @default("FORM")    // FORM | FILE | SUMMARY | TABLE
+  formSchema       String   @default("[]")      // JSON: 필드 정의 배열
+  tableSchema      String   @default("{}")      // JSON: TABLE 유형 - 컬럼/헤더필드/기본행 정의
+  menuNodeId       String?
+  menuNode         MenuNode? @relation(fields: [menuNodeId], references: [id])
+  defaultApprovers String   @default("[]")      // JSON: 기본 결재라인
+  allowedSites     String   @default("ALL")     // ALL | HS,PT (콤마 구분)
+  isActive         Boolean  @default(true)
+  sortOrder        Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  documentApprovals DocumentApproval[]
+}
+
+// ============================================
+// Document (범용 문서)
+// ============================================
+
+model Document {
+  id            String    @id @default(cuid())
+  moduleKey     String                          // 연결 모듈 키
+  title         String
+  status        String    @default("ACTIVE")    // ACTIVE | ARCHIVED | DELETED
+  siteCode      String    @default("ALL")
+  year          Int       @default(2026)
+  isCurrent     Boolean   @default(false)
+
+  // 파일 정보
+  originalName  String
+  storagePath   String
+  fileSize      Int
+  mimeType      String
+  extension     String
+  version       Int       @default(1)
+
+  createdById   String
+  createdBy     User      @relation("DocumentCreator", fields: [createdById], references: [id])
+  archivedAt    DateTime?
+  archivedById  String?
+  archivedBy    User?     @relation("DocumentArchiver", fields: [archivedById], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // 결재 연결 (문서결재형에서 사용)
+  approvalId    String?   @unique
+  approval      DocumentApproval? @relation(fields: [approvalId], references: [id])
+
+  logs          DocumentLog[]
+}
+
+// ============================================
+// Document Approval (문서결재)
+// ============================================
+
+model DocumentApproval {
+  id              String    @id @default(cuid())
+  moduleKey       String
+  formTemplateId  String?
+  formTemplate    FormTemplate? @relation(fields: [formTemplateId], references: [id])
+  title           String
+  formData        String    @default("{}")      // JSON: 양식 입력값 (FORM용)
+  headerData      String    @default("{}")      // JSON: TABLE 상단 필드값
+  tableData       String    @default("[]")      // JSON: TABLE 행 데이터
+  status          String    @default("DRAFT")   // DRAFT | REQUESTED | IN_PROGRESS | APPROVED | REJECTED
+  siteCode        String    @default("ALL")
+  year            Int       @default(2026)
+
+  submitterId     String
+  submitter       User      @relation("DocApprovalSubmitter", fields: [submitterId], references: [id])
+  submittedAt     DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  document        Document?
+  steps           DocumentApprovalStep[]
+}
+
+model DocumentApprovalStep {
+  id          String    @id @default(cuid())
+  approvalId  String
+  approval    DocumentApproval @relation(fields: [approvalId], references: [id], onDelete: Cascade)
+  stepOrder   Int
+  stepType    String    @default("APPROVE")    // APPROVE | AGREE | NOTIFY
+  status      String    @default("PENDING")    // PENDING | APPROVED | REJECTED | SKIPPED
+  comment     String?
+  actionAt    DateTime?
+  createdAt   DateTime  @default(now())
+
+  approverId  String
+  approver    User      @relation(fields: [approverId], references: [id])
+
+  @@unique([approvalId, stepOrder])
+}
+
+// ============================================
+// Equipment Master (설비 마스터)
+// ============================================
+
+model Equipment {
+  id              String    @id @default(cuid())
+  name            String                          // 설비명
+  location        String                          // 위치 (예: A동 1층)
+  model           String?                         // 모델명
+  manufacturer    String?                         // 제조사
+  serialNumber    String?                         // 시리얼 번호
+  installDate     DateTime?                       // 설치일
+  lastInspection  DateTime?                       // 최종 점검일
+  nextInspection  DateTime?                       // 차기 검사일
+  status          String    @default("ACTIVE")    // ACTIVE | INACTIVE | MAINTENANCE | DISPOSED
+  siteCode        String    @default("ALL")
+  note            String?                         // 비고
+  // 도면 첨부
+  drawingPath     String?                         // 도면 파일 저장 경로
+  drawingName     String?                         // 도면 원본 파일명
+  drawingSize     Int?                            // 도면 파일 크기
+  drawingMime     String?                         // 도면 MIME 타입
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  historyCards    EquipmentHistoryCard[]
+}
+
+model EquipmentHistoryCard {
+  id              String    @id @default(cuid())
+  equipmentId     String
+  equipment       Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  title           String
+  content         String?
+  cardType        String    @default("INSPECTION")  // INSPECTION | REPAIR | REPLACEMENT | OTHER
+  performedAt     DateTime  @default(now())
+  performedBy     String?
+  // 첨부파일
+  attachmentPath  String?
+  attachmentName  String?
+  attachmentSize  Int?
+  attachmentMime  String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// ============================================
+// Safety Inspection (안전검사)
+// ============================================
+
+model SafetyInspectionEquipmentType {
+  id        String   @id @default(cuid())
+  name      String   @unique  // e.g. "프레스", "크레인", "리프트"
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items SafetyInspectionItem[]
+}
+
+model SafetyInspectionItem {
+  id                  String    @id @default(cuid())
+  siteCode            String    @default("ALL")
+  year                Int
+  equipmentTypeId     String
+  equipmentType       SafetyInspectionEquipmentType @relation(fields: [equipmentTypeId], references: [id])
+  code                String                        // 관리번호
+  spec                String?                       // 형식/규격
+  location            String                        // 설치장소
+  capacity            String?                       // 용량
+  lastInspectionDate  DateTime?
+  expiryDate          DateTime?
+  certNo              String?                       // 검사증 번호
+  memo                String?
+  createdById         String
+  updatedById         String?
+  isDeleted           Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  histories SafetyInspectionHistory[]
+  photos    SafetyInspectionPhoto[]
+
+  @@index([siteCode, year])
+  @@index([code])
+}
+
+model SafetyInspectionHistory {
+  id                      String   @id @default(cuid())
+  safetyInspectionItemId  String
+  item                    SafetyInspectionItem @relation(fields: [safetyInspectionItemId], references: [id], onDelete: Cascade)
+  inspectionDate          DateTime
+  expiryDate              DateTime?
+  certNo                  String?
+  memo                    String?
+  createdById             String
+  createdAt               DateTime @default(now())
+}
+
+model SafetyInspectionPhoto {
+  id                      String   @id @default(cuid())
+  safetyInspectionItemId  String
+  item                    SafetyInspectionItem @relation(fields: [safetyInspectionItemId], references: [id], onDelete: Cascade)
+  fileName                String
+  storagePath             String
+  mimeType                String
+  fileSize                Int
+  uploadedById            String
+  createdAt               DateTime @default(now())
+}
+
+// ============================================
+// Document Log (감사 로그)
+// ============================================
+
+model DocumentLog {
+  id            String    @id @default(cuid())
+  documentId    String?
+  document      Document? @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  action        String    // UPLOAD | SET_CURRENT | ARCHIVE | DELETE | RESTORE
+  performedById String
+  performedBy   User      @relation(fields: [performedById], references: [id])
+  detail        String?
+  createdAt     DateTime  @default(now())
+}

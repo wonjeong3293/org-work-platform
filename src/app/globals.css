@@ -1,0 +1,147 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  /* Portal theme tokens */
+  --color-header-bg: var(--header-bg);
+  --color-header-fg: var(--header-fg);
+  --color-nav-bg: var(--nav-bg);
+  --color-nav-fg: var(--nav-fg);
+  --color-nav-active: var(--nav-active);
+  --color-nav-hover: var(--nav-hover);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: #F6F8FB;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #1e3a5f;
+  --primary-foreground: #f8f8f8;
+  --secondary: #f0f2f5;
+  --secondary-foreground: #2d2d2d;
+  --muted: #eef0f4;
+  --muted-foreground: #737373;
+  --accent: #e8ecf2;
+  --accent-foreground: #2d2d2d;
+  --destructive: #dc2626;
+  --border: #e2e4e8;
+  --input: #e2e4e8;
+  --ring: #1e3a5f;
+  --chart-1: #e76f51;
+  --chart-2: #2a9d8f;
+  --chart-3: #264653;
+  --chart-4: #e9c46a;
+  --chart-5: #f4a261;
+  /* Dark navy sidebar */
+  --sidebar: #0F1B2D;
+  --sidebar-foreground: #c8ccd4;
+  --sidebar-primary: #4a80c4;
+  --sidebar-primary-foreground: #f8f8f8;
+  --sidebar-accent: #1a2d47;
+  --sidebar-accent-foreground: #e0e4ea;
+  --sidebar-border: #1f3350;
+  --sidebar-ring: #737373;
+  /* Portal header / nav */
+  --header-bg: #0B1526;
+  --header-fg: #f0f0f0;
+  --nav-bg: #0F1B2D;
+  --nav-fg: #a0aab8;
+  --nav-active: #2563eb;
+  --nav-hover: #1a2d47;
+}
+
+.dark {
+  --background: #1a1a1a;
+  --foreground: #f8f8f8;
+  --card: #2d2d2d;
+  --card-foreground: #f8f8f8;
+  --popover: #2d2d2d;
+  --popover-foreground: #f8f8f8;
+  --primary: #e8e8e8;
+  --primary-foreground: #2d2d2d;
+  --secondary: #3a3a3a;
+  --secondary-foreground: #f8f8f8;
+  --muted: #3a3a3a;
+  --muted-foreground: #a0a0a0;
+  --accent: #3a3a3a;
+  --accent-foreground: #f8f8f8;
+  --destructive: #ef4444;
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.15);
+  --ring: #808080;
+  --chart-1: #3b82f6;
+  --chart-2: #34d399;
+  --chart-3: #f4a261;
+  --chart-4: #a78bfa;
+  --chart-5: #f87171;
+  --sidebar: #2d2d2d;
+  --sidebar-foreground: #f8f8f8;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #f8f8f8;
+  --sidebar-accent: #3a3a3a;
+  --sidebar-accent-foreground: #f8f8f8;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #808080;
+  --header-bg: #0a1120;
+  --header-fg: #f0f0f0;
+  --nav-bg: #101828;
+  --nav-fg: #a0aab8;
+  --nav-active: #2563eb;
+  --nav-hover: #1a2a40;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
