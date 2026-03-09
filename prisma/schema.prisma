@@ -526,6 +526,10 @@ model Equipment {
   status          String    @default("ACTIVE")    // ACTIVE | INACTIVE | MAINTENANCE | DISPOSED
   siteCode        String    @default("ALL")
   note            String?                         // 비고
+  // 사양 (spec)
+  ratedOutput     String?                         // 정격 출력
+  ratedVoltage    String?                         // 정격 전압
+  ratedCurrent    String?                         // 정격 전류
   // 도면 첨부
   drawingPath     String?                         // 도면 파일 저장 경로
   drawingName     String?                         // 도면 원본 파일명
@@ -535,6 +539,7 @@ model Equipment {
   updatedAt       DateTime  @updatedAt
 
   historyCards    EquipmentHistoryCard[]
+  specValues      EquipmentSpecValue[]
 }
 
 model EquipmentHistoryCard {
@@ -546,6 +551,9 @@ model EquipmentHistoryCard {
   cardType        String    @default("INSPECTION")  // INSPECTION | REPAIR | REPLACEMENT | OTHER
   performedAt     DateTime  @default(now())
   performedBy     String?
+  vendor          String?                           // 업체명
+  repairCost      Int?                              // 수리비 (원 단위)
+  repairDetail    String?                           // 수리 내역
   // 첨부파일
   attachmentPath  String?
   attachmentName  String?
@@ -553,6 +561,34 @@ model EquipmentHistoryCard {
   attachmentMime  String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
+}
+
+model EquipmentSpecField {
+  id          String   @id @default(cuid())
+  siteCode    String   @default("ALL")
+  label       String                     // 컬럼 표시명 (예: "냉각방식", "중량")
+  fieldKey    String                     // 컬럼 키 (예: "cooling_method", "weight")
+  unit        String?                    // 단위 (예: "kg", "kW")
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  values      EquipmentSpecValue[]
+  @@unique([siteCode, fieldKey])
+}
+
+model EquipmentSpecValue {
+  id          String              @id @default(cuid())
+  equipmentId String
+  equipment   Equipment           @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+  fieldId     String
+  field       EquipmentSpecField  @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+  value       String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([equipmentId, fieldId])
 }
 
 // ============================================

@@ -7,6 +7,7 @@ import { Wrench, AlertTriangle, XCircle, CheckCircle } from "lucide-react";
 import { getEquipmentList, getEquipmentStatusCounts } from "@/actions/equipment-actions";
 import { EquipmentTable } from "@/components/equipment/equipment-table";
 import { EquipmentCreateDialog } from "@/components/equipment/equipment-create-dialog";
+import { EquipmentExcelImportDialog } from "@/components/equipment/equipment-excel-import-dialog";
 
 const breadcrumbItems = [
   { label: "홈", href: "/dashboard" },
@@ -42,7 +43,10 @@ export default async function EquipmentMasterPage({
             생산설비 현황을 조회하고 관리합니다.
           </p>
         </div>
-        <EquipmentCreateDialog />
+        <div className="flex gap-2">
+          <EquipmentExcelImportDialog />
+          <EquipmentCreateDialog />
+        </div>
       </div>
 
       {/* 상태 요약 카드 */}

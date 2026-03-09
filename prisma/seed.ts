@@ -259,6 +259,9 @@ async function main() {
       data: { title: "설비 마스터", slug: "equipment-master", domain: "PRODUCTION", type: "PAGE", parentId: equipmentMaintenance.id, sortOrder: 0, moduleKey: "equipment_master", route: "/production/equipment-master", pageType: "EQUIPMENT_MASTER" },
     });
     await prisma.menuNode.create({
+      data: { title: "유지보수 현황", slug: "prod-equipment-maintenance-dashboard", domain: "PRODUCTION", type: "PAGE", parentId: equipmentMaintenance.id, sortOrder: 1, moduleKey: "maintenance_dashboard", route: "/production/maintenance-dashboard" },
+    });
+    await prisma.menuNode.create({
       data: { title: "품질관리", slug: "quality-mgmt", domain: "PRODUCTION", type: "FOLDER", parentId: production.id, sortOrder: 2 },
     });
 

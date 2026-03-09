@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,9 +13,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, ChevronRight } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Search, ChevronRight, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { getSiteLabel } from "@/lib/sites";
 import { EquipmentDetailDrawer } from "./equipment-detail-drawer";
+import { deleteEquipment } from "@/actions/equipment-actions";
 import type { EquipmentListItem } from "@/actions/equipment-actions";
 
 const STATUS_MAP: Record<string, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
@@ -43,9 +57,32 @@ interface EquipmentTableProps {
 }
 
 export function EquipmentTable({ initialData }: EquipmentTableProps) {
+  const router = useRouter();
+  const { data: sessionData } = useSession();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: string; name: string } | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const userRole = (sessionData?.user as any)?.role?.name;
+  const canDelete = userRole === "ADMIN" || userRole === "MANAGER";
+
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await deleteEquipment(deleteTarget.id);
+      toast.success(`"${deleteTarget.name}" 설비가 삭제되었습니다.`);
+      setDeleteTarget(null);
+      router.refresh();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "삭제에 실패했습니다.");
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   const filtered = useMemo(() => {
     return initialData.filter((eq) => {
@@ -111,6 +148,7 @@ export function EquipmentTable({ initialData }: EquipmentTableProps) {
                 <th className="pb-3 pr-4 font-medium">차기 검사일</th>
                 <th className="pb-3 pr-4 font-medium">상태</th>
                 <th className="pb-3 font-medium">상세</th>
+                {canDelete && <th className="pb-3 font-medium">삭제</th>}
               </tr>
             </thead>
             <tbody>
@@ -152,6 +190,21 @@ export function EquipmentTable({ initialData }: EquipmentTableProps) {
                         <ChevronRight className="h-4 w-4" />
                       </Button>
                     </td>
+                    {canDelete && (
+                      <td className="py-3">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2 text-red-500 hover:text-red-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteTarget({ id: eq.id, name: eq.name });
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </td>
+                    )}
                   </tr>
                 );
               })}
@@ -165,6 +218,24 @@ export function EquipmentTable({ initialData }: EquipmentTableProps) {
         equipmentId={selectedId}
         onClose={() => setSelectedId(null)}
       />
+
+      {/* 삭제 확인 */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(v) => { if (!v) setDeleteTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>설비 삭제</AlertDialogTitle>
+            <AlertDialogDescription>
+              &quot;{deleteTarget?.name}&quot; 설비를 삭제하시겠습니까? 이력카드를 포함한 모든 데이터가 삭제됩니다.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>취소</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDelete} disabled={deleting} className="bg-red-600 hover:bg-red-700">
+              {deleting ? "삭제 중..." : "삭제"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

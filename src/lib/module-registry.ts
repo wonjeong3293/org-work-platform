@@ -21,6 +21,7 @@ export const MODULE_REGISTRY: Record<string, ModuleDefinition> = {
 
   // 생산기술 - 설비관리
   equipment_master: { route: "/production/equipment-master", label: "설비 마스터" },
+  maintenance_dashboard: { route: "/production/maintenance-dashboard", label: "유지보수 현황" },
 
   // 공통
   dashboard: { route: "/dashboard", label: "대시보드" },
