@@ -98,7 +98,6 @@ export default async function DocumentArchivePage({
             isAdmin={isAdmin}
             extensions={extensions}
             currentSite={site}
-            moduleKey={moduleKey}
           />
         </CardContent>
       </Card>

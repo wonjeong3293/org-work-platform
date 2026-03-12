@@ -21,17 +21,6 @@ function findNodeBySlug(nodes: MenuTreeNode[], slug: string): MenuTreeNode | nul
   return null;
 }
 
-function findParentNode(nodes: MenuTreeNode[], targetSlug: string): MenuTreeNode | null {
-  for (const node of nodes) {
-    for (const child of node.children) {
-      if (child.slug === targetSlug) return node;
-    }
-    const found = findParentNode(node.children, targetSlug);
-    if (found) return found;
-  }
-  return null;
-}
-
 export default async function SubPage({
   params,
 }: {

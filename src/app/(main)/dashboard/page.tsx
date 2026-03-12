@@ -59,13 +59,13 @@ export default async function DashboardPage() {
   const userId = session?.user?.id;
   const menuTree = await getMenuTree();
 
-  const [todoCount, inProgressCount, pendingApprovals, recentTasks] =
+  const [todoCount, inProgressCount, pendingApprovals, recentEvents] =
     await Promise.all([
-      prisma.task.count({
-        where: { assigneeId: userId, status: "TODO" },
+      prisma.plannerEvent.count({
+        where: { userId: userId!, status: "TODO" },
       }),
-      prisma.task.count({
-        where: { assigneeId: userId, status: "IN_PROGRESS" },
+      prisma.plannerEvent.count({
+        where: { userId: userId!, status: "IN_PROGRESS" },
       }),
       prisma.approvalStep.count({
         where: {
@@ -74,16 +74,10 @@ export default async function DashboardPage() {
           request: { status: { in: ["PENDING", "IN_PROGRESS"] } },
         },
       }),
-      prisma.task.findMany({
-        where: {
-          OR: [{ assigneeId: userId }, { creatorId: userId }],
-        },
+      prisma.plannerEvent.findMany({
+        where: { userId: userId! },
         orderBy: { updatedAt: "desc" },
         take: 5,
-        include: {
-          assignee: { select: { name: true } },
-          project: { select: { name: true } },
-        },
       }),
     ]);
 
@@ -163,46 +157,50 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Recent Tasks */}
+      {/* Recent Events */}
       <Card className="border-0 shadow-sm">
         <CardHeader>
-          <CardTitle className="text-lg">최근 업무</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-lg">최근 일정</CardTitle>
+            <Link href="/planner" className="text-sm text-primary hover:underline">
+              플래너 열기 →
+            </Link>
+          </div>
         </CardHeader>
         <CardContent>
-          {recentTasks.length === 0 ? (
+          {recentEvents.length === 0 ? (
             <p className="text-center text-muted-foreground py-8">
-              아직 등록된 업무가 없습니다.
+              아직 등록된 일정이 없습니다.
             </p>
           ) : (
             <div className="space-y-3">
-              {recentTasks.map((task) => (
+              {recentEvents.map((event) => (
                 <div
-                  key={task.id}
+                  key={event.id}
                   className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 rounded-lg border p-3"
                 >
                   <div className="min-w-0">
-                    <p className="font-medium truncate">{task.title}</p>
+                    <p className="font-medium truncate">{event.title}</p>
                     <p className="text-xs sm:text-sm text-muted-foreground">
-                      {task.project?.name || "프로젝트 없음"} ·{" "}
-                      {task.assignee?.name || "미배정"}
+                      {new Date(event.startDate).toLocaleDateString("ko-KR")}
                     </p>
                   </div>
                   <Badge
                     variant={
-                      task.status === "DONE"
+                      event.status === "DONE"
                         ? "default"
-                        : task.status === "IN_PROGRESS"
+                        : event.status === "IN_PROGRESS"
                         ? "secondary"
                         : "outline"
                     }
                   >
-                    {task.status === "TODO"
+                    {event.status === "TODO"
                       ? "할 일"
-                      : task.status === "IN_PROGRESS"
+                      : event.status === "IN_PROGRESS"
                       ? "진행 중"
-                      : task.status === "IN_REVIEW"
-                      ? "검토 중"
-                      : "완료"}
+                      : event.status === "DONE"
+                      ? "완료"
+                      : "취소"}
                   </Badge>
                 </div>
               ))}

@@ -214,6 +214,7 @@ function DrawingSection({ equipment }: { equipment: EquipmentDetail }) {
                     title={equipment.drawingName || "도면"}
                   />
                 ) : isImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={`/api/equipment/drawing/preview/${equipment.id}`}
                     alt={equipment.drawingName || "도면"}
@@ -536,7 +537,7 @@ function HistoryCardImportDialog({
           const errors: string[] = [];
           if (!title) errors.push("이력 필수");
           // 날짜 처리: Date 객체이면 ISO 변환, 문자열이면 그대로
-          let dateVal = r[0];
+          const dateVal = r[0];
           let dateStr = "";
           if (dateVal instanceof Date && !isNaN(dateVal.getTime())) {
             dateStr = dateVal.toISOString().slice(0, 10);

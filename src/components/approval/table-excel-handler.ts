@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import type { TableTemplateSchema, TableRowData, TableColumn, HeaderField } from "@/lib/table-schema";
+import type { TableTemplateSchema, TableRowData, TableColumn } from "@/lib/table-schema";
 
 /**
  * 테이블 문서 엑셀 다운로드

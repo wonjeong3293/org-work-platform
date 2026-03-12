@@ -16,8 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { X, Plus, Search } from "lucide-react";
+import { X, Search } from "lucide-react";
 import { toast } from "sonner";
 
 type Template = { id: string; name: string; category: string; description: string | null };
@@ -40,9 +39,11 @@ export default function NewApprovalPage() {
   useEffect(() => {
     if (searchQuery.length >= 1) {
       searchUsers(searchQuery).then(setSearchResults);
-    } else {
-      setSearchResults([]);
+      return;
     }
+    // Clear asynchronously to avoid synchronous setState in effect
+    const id = requestAnimationFrame(() => setSearchResults([]));
+    return () => cancelAnimationFrame(id);
   }, [searchQuery]);
 
   function addApprover(user: SearchResult) {

@@ -2,7 +2,7 @@ import { getProjects } from "@/actions/project-actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, FolderKanban, Users, CheckSquare } from "lucide-react";
+import { Plus, FolderKanban, Users } from "lucide-react";
 import Link from "next/link";
 import { PROJECT_STATUS } from "@/lib/constants";
 
@@ -48,10 +48,6 @@ export default async function ProjectsPage() {
                     </p>
                   )}
                   <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span className="flex items-center gap-1">
-                      <CheckSquare className="h-4 w-4" />
-                      {project._count.tasks} 업무
-                    </span>
                     <span className="flex items-center gap-1">
                       <Users className="h-4 w-4" />
                       {project._count.members}명

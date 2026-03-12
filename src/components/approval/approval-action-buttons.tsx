@@ -10,14 +10,13 @@ import { processDocApproval, withdrawDocApproval } from "@/actions/doc-approval-
 
 interface Props {
   approvalId: string;
-  moduleKey: string;
   status: string;
   currentUserId: string;
   isSubmitter: boolean;
   steps: { approverId: string; status: string }[];
 }
 
-export function ApprovalActionButtons({ approvalId, moduleKey, status, currentUserId, isSubmitter, steps }: Props) {
+export function ApprovalActionButtons({ approvalId, status, currentUserId, isSubmitter, steps }: Props) {
   const router = useRouter();
   const [comment, setComment] = useState("");
   const [loading, setLoading] = useState(false);

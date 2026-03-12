@@ -40,7 +40,7 @@ export function TableExcelUploadDialog({
       const parsed = await parseTableExcel(file, schema);
       setResult(parsed);
       setStep("preview");
-    } catch (error) {
+    } catch {
       // reset
     } finally {
       setIsParsing(false);

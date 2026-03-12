@@ -26,7 +26,7 @@ export const MODULE_REGISTRY: Record<string, ModuleDefinition> = {
   // 공통
   dashboard: { route: "/dashboard", label: "대시보드" },
   projects: { route: "/projects", label: "프로젝트" },
-  tasks: { route: "/tasks", label: "업무관리" },
+  planner: { route: "/planner", label: "워크플래너" },
   approvals: { route: "/approvals", label: "결재" },
   organization: { route: "/organization", label: "조직" },
 };

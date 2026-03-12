@@ -8,7 +8,7 @@ export async function getProjects() {
   return prisma.project.findMany({
     include: {
       department: { select: { name: true } },
-      _count: { select: { tasks: true, members: true } },
+      _count: { select: { members: true } },
     },
     orderBy: { updatedAt: "desc" },
   });
@@ -22,11 +22,7 @@ export async function getProjectById(id: string) {
       members: {
         include: { user: { select: { id: true, name: true, position: true, profileImage: true } } },
       },
-      tasks: {
-        include: { assignee: { select: { id: true, name: true, profileImage: true } } },
-        orderBy: { sortOrder: "asc" },
-      },
-      _count: { select: { tasks: true } },
+      _count: { select: { members: true } },
     },
   });
 }

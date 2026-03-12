@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -13,9 +13,8 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { FileSpreadsheet, Upload, AlertCircle, CheckCircle2, Plus, X, ArrowUp, ArrowDown } from "lucide-react";
+import { FileSpreadsheet, AlertCircle, CheckCircle2, Plus, X, ArrowUp, ArrowDown } from "lucide-react";
 import { createFormTemplate } from "@/actions/form-template-actions";
 import { parseExcelToFormDraft, type ExcelDraft } from "@/lib/excel-parser";
 import type { TableTemplateSchema, HeaderField, TableColumn } from "@/lib/table-schema";

@@ -1,11 +1,18 @@
-export const TASK_STATUS = {
-  TODO: { value: "TODO", label: "할 일" },
-  IN_PROGRESS: { value: "IN_PROGRESS", label: "진행 중" },
-  IN_REVIEW: { value: "IN_REVIEW", label: "검토 중" },
-  DONE: { value: "DONE", label: "완료" },
+export const PLANNER_EVENT_TYPE = {
+  TASK: { value: "TASK", label: "업무" },
+  MEETING: { value: "MEETING", label: "회의" },
+  DEADLINE: { value: "DEADLINE", label: "마감" },
+  PERSONAL: { value: "PERSONAL", label: "개인" },
 } as const;
 
-export const TASK_PRIORITY = {
+export const PLANNER_STATUS = {
+  TODO: { value: "TODO", label: "할 일", color: "bg-gray-100 text-gray-700" },
+  IN_PROGRESS: { value: "IN_PROGRESS", label: "진행 중", color: "bg-blue-100 text-blue-700" },
+  DONE: { value: "DONE", label: "완료", color: "bg-green-100 text-green-700" },
+  CANCELLED: { value: "CANCELLED", label: "취소", color: "bg-red-100 text-red-100" },
+} as const;
+
+export const PLANNER_PRIORITY = {
   LOW: { value: "LOW", label: "낮음", color: "bg-gray-100 text-gray-700" },
   MEDIUM: { value: "MEDIUM", label: "보통", color: "bg-blue-100 text-blue-700" },
   HIGH: { value: "HIGH", label: "높음", color: "bg-orange-100 text-orange-700" },

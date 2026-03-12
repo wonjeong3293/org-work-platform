@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Download, Search } from "lucide-react";
 import { getSiteLabel } from "@/lib/sites";
+import { useHydrated } from "@/lib/client-only";
 import { DocumentDeleteDialog } from "./document-delete-dialog";
 import { DocumentSetCurrentButton } from "./document-set-current-button";
 import { DocumentArchiveButton } from "./document-archive-button";
@@ -37,7 +38,6 @@ interface Props {
   isAdmin: boolean;
   extensions: string[];
   currentSite: string;
-  moduleKey: string;
 }
 
 function formatDate(dateStr: string): string {
@@ -57,9 +57,8 @@ function ClientOnlyText({
   value: string;
   fallback?: string;
 }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  return <>{mounted ? value : fallback}</>;
+  const hydrated = useHydrated();
+  return <>{hydrated ? value : fallback}</>;
 }
 
 function siteBadgeVariant(siteCode: string) {
@@ -73,7 +72,6 @@ export function DocumentTable({
   isAdmin,
   extensions,
   currentSite,
-  moduleKey,
 }: Props) {
   const [search, setSearch] = useState("");
   const [extensionFilter, setExtensionFilter] = useState("all");

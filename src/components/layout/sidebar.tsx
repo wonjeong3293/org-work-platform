@@ -18,6 +18,7 @@ import {
   Home,
   Factory,
   Menu,
+  CalendarDays,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,12 +40,8 @@ const iconMap: Record<string, LucideIcon> = {
   Folder,
   Home,
   Factory,
+  CalendarDays,
 };
-
-function getIcon(name: string | null): LucideIcon | undefined {
-  if (!name) return undefined;
-  return iconMap[name];
-}
 
 const DOMAIN_SECTION_MAP: Record<string, string> = {
   COMMON: "common",
@@ -52,6 +49,10 @@ const DOMAIN_SECTION_MAP: Record<string, string> = {
   ENV: "env",
   SAFETY: "safety",
 };
+
+const topItems = [
+  { title: "워크 플래너", href: "/planner", icon: CalendarDays },
+];
 
 const bottomItems = [
   { title: "관리자", href: "/admin", icon: Shield },
@@ -91,7 +92,8 @@ function NavItem({
   depth: number;
 }) {
   const isActive = isNodeActive(node, pathname);
-  const Icon = getIcon(node.icon) || Folder;
+  const icon = node.icon;
+  const IconComp = iconMap[icon ?? ""] ?? Folder;
   const hasChildren = node.children.length > 0;
   const href = getNodeHref(node);
   const [expanded, setExpanded] = useState(isActive);
@@ -112,7 +114,7 @@ function NavItem({
           )}
           title={node.title}
         >
-          <Icon className="h-5 w-5" />
+          <IconComp className="h-5 w-5" />
         </Link>
       </li>
     );
@@ -135,7 +137,7 @@ function NavItem({
             href={sectionHref}
             className="flex flex-1 items-center gap-3 px-3 py-2 min-w-0"
           >
-            <Icon className="h-4.5 w-4.5 shrink-0" />
+            <IconComp className="h-4.5 w-4.5 shrink-0" />
             <span className="flex-1 text-left truncate">{node.title}</span>
           </Link>
           {hasChildren && (
@@ -239,6 +241,31 @@ export function Sidebar({ menuTree }: { menuTree: MenuTreeNode[] }) {
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-2">
+        {/* Top static items */}
+        <ul className="space-y-1 mb-2">
+          {topItems.map((item) => {
+            const isActive = pathname.startsWith(item.href);
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                    isActive
+                      ? "bg-nav-active text-white font-medium"
+                      : "text-nav-fg hover:bg-nav-hover hover:text-white",
+                    collapsed && "justify-center px-2.5",
+                  )}
+                  title={collapsed ? item.title : undefined}
+                >
+                  <item.icon className={cn("shrink-0", collapsed ? "h-5 w-5" : "h-4.5 w-4.5")} />
+                  {!collapsed && <span>{item.title}</span>}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="border-t border-white/10 mb-2" />
         <ul className="space-y-1">
           {menuTree.map((node) => (
             <NavItem
@@ -319,6 +346,30 @@ export function MobileSidebar({ menuTree }: { menuTree: MenuTreeNode[] }) {
 
           {/* Navigation */}
           <nav className="flex-1 overflow-y-auto p-2">
+            {/* Top static items */}
+            <ul className="space-y-1 mb-2">
+              {topItems.map((item) => {
+                const isActive = pathname.startsWith(item.href);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                        isActive
+                          ? "bg-nav-active text-white font-medium"
+                          : "text-nav-fg hover:bg-nav-hover hover:text-white",
+                      )}
+                    >
+                      <item.icon className="h-4.5 w-4.5 shrink-0" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="border-t border-white/10 mb-2" />
             <ul className="space-y-1">
               {menuTree.map((node) => (
                 <MobileNavItem
@@ -375,7 +426,8 @@ function MobileNavItem({
   onNavigate: () => void;
 }) {
   const isActive = isNodeActive(node, pathname);
-  const Icon = getIcon(node.icon) || Folder;
+  const icon = node.icon;
+  const IconComp = iconMap[icon ?? ""] ?? Folder;
   const hasChildren = node.children.length > 0;
   const href = getNodeHref(node);
   const [expanded, setExpanded] = useState(isActive);
@@ -399,7 +451,7 @@ function MobileNavItem({
             onClick={onNavigate}
             className="flex flex-1 items-center gap-3 px-3 py-2 min-w-0"
           >
-            <Icon className="h-4.5 w-4.5 shrink-0" />
+            <IconComp className="h-4.5 w-4.5 shrink-0" />
             <span className="flex-1 text-left truncate">{node.title}</span>
           </Link>
           {hasChildren && (

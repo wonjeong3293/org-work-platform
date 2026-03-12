@@ -171,7 +171,6 @@ export default async function DocApprovalDetailPage({
       {/* 결재 처리 버튼 */}
       <ApprovalActionButtons
         approvalId={id}
-        moduleKey={moduleKey}
         status={approval.status}
         currentUserId={currentUserId}
         isSubmitter={isSubmitter}

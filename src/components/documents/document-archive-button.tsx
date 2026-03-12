@@ -13,11 +13,10 @@ import {
 export function DocumentArchiveButton({
   documentId,
   isArchived,
-  originalName,
 }: {
   documentId: string;
   isArchived: boolean;
-  originalName: string;
+  originalName?: string;
 }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);

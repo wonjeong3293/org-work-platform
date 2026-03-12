@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,6 +16,7 @@ import { PolicyArchiveButton } from "./policy-archive-button";
 import { PolicyDeleteDialog } from "./policy-delete-dialog";
 import { PolicySetCurrentButton } from "./policy-set-current-button";
 import { getSiteLabel } from "@/lib/sites";
+import { useHydrated } from "@/lib/client-only";
 
 interface PolicyDocument {
   id: string;
@@ -37,12 +38,6 @@ interface PolicyDocumentTableProps {
   isAdmin: boolean;
   extensions: string[];
   currentSite: string;
-}
-
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 function formatDate(dateStr: string): string {
@@ -68,9 +63,8 @@ function siteBadgeVariant(siteCode: string) {
 }
 
 function ClientOnlyText({ value, fallback = "-" }: { value: string; fallback?: string }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  return <>{mounted ? value : fallback}</>;
+  const hydrated = useHydrated();
+  return <>{hydrated ? value : fallback}</>;
 }
 
 export function PolicyDocumentTable({

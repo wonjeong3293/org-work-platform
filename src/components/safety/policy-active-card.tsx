@@ -1,16 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Download, FileText } from "lucide-react";
 import { PolicyPreviewButton } from "./policy-preview";
+import { useHydrated } from "@/lib/client-only";
 
 function ClientOnlyText({ value, fallback = "-" }: { value: string; fallback?: string }) {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-  return <>{mounted ? value : fallback}</>;
+  const hydrated = useHydrated();
+  return <>{hydrated ? value : fallback}</>;
 }
 
 interface PolicyDocument {

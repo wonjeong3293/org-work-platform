@@ -24,7 +24,7 @@ async function main() {
 
   // Permissions
   const permissionCodes = [
-    "task:create", "task:edit", "task:delete", "task:view",
+    "planner:create", "planner:edit", "planner:delete", "planner:view",
     "project:create", "project:edit", "project:delete", "project:view",
     "approval:create", "approval:manage", "approval:view",
     "org:manage", "user:manage", "role:manage", "admin:access",
@@ -62,7 +62,7 @@ async function main() {
 
   // Assign basic permissions to member
   const memberPerms = permissions.filter((p) =>
-    ["task:create", "task:edit", "task:view", "project:view", "approval:create", "approval:view"].includes(p.code)
+    ["planner:create", "planner:edit", "planner:view", "project:view", "approval:create", "approval:view"].includes(p.code)
   );
   for (const p of memberPerms) {
     await prisma.rolePermission.upsert({
@@ -339,7 +339,7 @@ async function main() {
       data: { title: "프로젝트", slug: "common-projects", domain: "COMMON", type: "PAGE", parentId: common.id, sortOrder: 0, moduleKey: "projects", route: "/projects" },
     });
     await prisma.menuNode.create({
-      data: { title: "업무관리", slug: "common-tasks", domain: "COMMON", type: "PAGE", parentId: common.id, sortOrder: 1, moduleKey: "tasks", route: "/tasks" },
+      data: { title: "워크플래너", slug: "common-planner", domain: "COMMON", type: "PAGE", parentId: common.id, sortOrder: 1, moduleKey: "planner", route: "/planner" },
     });
     await prisma.menuNode.create({
       data: { title: "결재", slug: "common-approvals", domain: "COMMON", type: "PAGE", parentId: common.id, sortOrder: 2, moduleKey: "approvals", route: "/approvals" },

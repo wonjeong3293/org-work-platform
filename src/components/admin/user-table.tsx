@@ -95,8 +95,9 @@ export function UserTable({
     return list;
   }, [users, search, sortKey, sortAsc]);
 
-  const SortHeader = ({ label, k }: { label: string; k: SortKey }) => (
+  const renderSortHeader = (label: string, k: SortKey) => (
     <th
+      key={k}
       className="pb-3 pr-4 font-medium cursor-pointer select-none hover:text-foreground"
       onClick={() => handleSort(k)}
     >
@@ -122,13 +123,13 @@ export function UserTable({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b text-left text-muted-foreground">
-              <SortHeader label="이름" k="name" />
-              <SortHeader label="이메일" k="email" />
-              <SortHeader label="직위" k="position" />
-              <SortHeader label="부서" k="department" />
-              <SortHeader label="역할" k="role" />
-              <SortHeader label="상태" k="isActive" />
-              <SortHeader label="가입일" k="createdAt" />
+              {renderSortHeader("이름", "name")}
+              {renderSortHeader("이메일", "email")}
+              {renderSortHeader("직위", "position")}
+              {renderSortHeader("부서", "department")}
+              {renderSortHeader("역할", "role")}
+              {renderSortHeader("상태", "isActive")}
+              {renderSortHeader("가입일", "createdAt")}
               <th className="pb-3 font-medium">작업</th>
             </tr>
           </thead>

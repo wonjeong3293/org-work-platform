@@ -13,7 +13,7 @@ import {
   validateBulkData,
   bulkCreateItems,
 } from "@/actions/safety-inspection-actions";
-import type { BulkCreateInput, BulkValidationResult } from "@/actions/safety-inspection-actions";
+import type { BulkValidationResult } from "@/actions/safety-inspection-actions";
 import { parseExcelFile } from "./excel-handler";
 import { toast } from "sonner";
 
@@ -33,7 +33,6 @@ export function ExcelUploadDialog({
   currentYear,
 }: Props) {
   const [step, setStep] = useState<Step>("upload");
-  const [parsedData, setParsedData] = useState<BulkCreateInput[]>([]);
   const [validationResult, setValidationResult] = useState<BulkValidationResult | null>(null);
   const [isPending, startTransition] = useTransition();
   const [createdCount, setCreatedCount] = useState(0);
@@ -48,8 +47,6 @@ export function ExcelUploadDialog({
         toast.error("데이터가 없습니다.");
         return;
       }
-      setParsedData(data);
-
       // 서버 검증
       startTransition(async () => {
         const result = await validateBulkData(data);
@@ -78,7 +75,6 @@ export function ExcelUploadDialog({
 
   const handleClose = () => {
     setStep("upload");
-    setParsedData([]);
     setValidationResult(null);
     setCreatedCount(0);
     onOpenChange(false);
